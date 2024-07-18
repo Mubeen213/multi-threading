@@ -40,7 +40,7 @@ The primary methods to create threads are:
 * The Runnable interface is annotated with @FunctionalInterface, which means it has a single abstract method, run(). This allows instances of Runnable to be created using lambda expressions.
 * `void run()`: This is the only method in the Runnable interface. When a thread is started, the JVM calls the run() method of the Runnable object that was passed to the thread's constructor.
 
-### Implementing Runnable
+## Implementing Runnable Interface
 #### To create a thread using the Runnable interface, you need to perform the following steps:
 * Implement the Runnable interface.
 * Provide an implementation of the run() method.
@@ -107,3 +107,175 @@ class Thread2 implements Runnable {
 
 ```
 
+## Extending the `Thread` Class for Multithreading
+
+* One way to create a new thread in Java is by extending the Thread class. This involves creating a subclass of Thread and overriding its run() method with the code you want the new thread to execute.
+
+#### Key Points:
+* Simplicity: This method is straightforward and easy to understand for beginners.
+* Less Flexible: Extending Thread can be less flexible compared to implementing Runnable because Java does not support multiple inheritance. If your class already extends another class, you cannot extend Thread.
+* Thread Safety: Ensure that the code in the run() method is thread-safe if it accesses shared resources.
+
+## Code:
+```java
+
+public class ExtendsThread {
+
+    public static void main(String[] args) {
+        Thread one  = new Thread1();
+        Thread two = new Thread2();
+        one.start();
+        two.start();
+    }
+}
+
+class Thread1 extends Thread {
+
+    @Override
+    public void run() {
+        for (int i = 0; i < 10; i++) {
+            System.out.println("From thread 1: " + i);
+        }
+    }
+}
+class Thread2 extends Thread {
+
+    @Override
+    public void run() {
+        for (int i = 0; i < 10; i++) {
+            System.out.println("From thread 2: " + i);
+        }
+    }
+}
+```
+
+### Comparision between `Runnable` Interface and `Thread` Class 
+
+### Performance
+* Runnable: Generally has a slight edge in performance due to the ability to separate task logic from thread management. This can lead to better optimization and resource management.
+* Thread: Slightly less performant if many thread objects are created due to the additional overhead of inheriting the Thread class.
+### Flexibility
+* Runnable: More flexible as it allows a class to implement multiple interfaces. This is useful if your class needs to extend another class.
+* Thread: Less flexible due to Java's single inheritance model. If you extend Thread, you cannot extend any other class.
+### Safety
+* Runnable: Encourages better design by promoting separation of concerns. The task is separated from the thread's execution mechanics, making the code easier to manage and test.
+Thread: Tends to encourage a tighter coupling between the task and the thread's execution mechanics, which can lead to design issues and harder-to-maintain code.
+### Code Reusability
+* Runnable: Promotes code reusability. The same Runnable instance can be passed to multiple Thread objects.
+* Thread: Less reusable as each subclass of Thread is typically tied to a specific task.
+### Use Case
+* Runnable: Ideal for scenarios where tasks can be separated from the thread execution or when the class needs to extend another class.
+* Thread: Suitable for simple applications where extending a single class to create a new thread is sufficient.
+### Summary
+* Performance: Runnable has a slight edge.
+* Flexibility: Runnable is more flexible.
+* Safety: Runnable encourages better design and separation of concerns.
+* Code Reusability: Runnable is more reusable.
+* Use Case: Runnable is generally preferred, especially for more complex designs.
+
+### `Join` method in Java Threads
+
+```java
+public class Main {
+
+    public static void main(String[] args) {
+
+        Thread one  = new Thread(() -> runLoop("Thread 1"));
+        Thread two  = new Thread(() -> runLoop("Thread 2"));
+        
+        System.out.println("Before starting threads");
+        
+        one.start();
+        two.start();
+        
+        System.out.println("Done executing threads");
+
+    }
+
+    private static void runLoop(String thread){
+        for (int i = 0; i < 10; i++) {
+            System.out.println("From " + thread + " " + i);
+        }
+    }
+}
+```
+* When the above code gets executed the first thing that will be printed is: <br>
+`Before starting threads`<br>
+`Done executing threads`
+
+- This is because the `Main` Thread is executed first and has the highest priority.
+Then,  the Thread one and two are executed independently based on availability of resources.
+
+Now, if we want `Done executing threads` to be printed only after thread 1, 2 is executed, then we can use the `Join` Method
+
+* The join method in Java is used to pause the execution of the current thread
+until the thread on which join was called has finished executing.
+This is particularly useful when you want one thread to wait for another to
+complete before continuing its own execution.
+* Parent thread waits for the completion of the child thread and then continues its execution.
+```java
+public class JoinThread {
+
+    public static void main(String[] args) throws InterruptedException {
+
+        Thread one  = new Thread(() -> runLoop("Thread 1"));
+        Thread two  = new Thread(() -> runLoop("Thread 2"));
+        
+        System.out.println("Before starting threads");
+        
+        one.start();
+        two.start();
+        one.join();
+        two.join();
+        
+        System.out.println("Done executing threads");
+    }
+
+    private static void runLoop(String thread){
+        for (int i = 0; i < 10; i++) {
+            System.out.println("From " + thread + " " + i);
+        }
+    }
+}
+```
+
+### Race Condition:
+A race condition occurs in a multi-threaded environment when two or more
+threads access shared data and try to change it simultaneously.
+Without proper synchronization, the final outcome of the operations depends on the
+timing of the threads, leading to unpredictable and incorrect results.
+
+#### Example:
+```java
+public class RaceCondition {
+
+    private static int counter = 0;
+
+    public static void main(String[] args) throws InterruptedException {
+
+        Thread one = new Thread(RaceCondition::runLoop);
+        Thread two = new Thread(RaceCondition::runLoop);
+
+        one.start();
+        two.start();
+
+        one.join();
+        two.join();
+
+        System.out.println(counter);
+    }
+
+    private static void runLoop(){
+        for (int i = 0; i < 10000; i++) {
+            counter++;
+        }
+    }
+}
+```
+* The final outcome of counter value is always unpredictable, This is because both the 
+threads are accessing the same variable simultaneously.
+* Essentially what `counter++` does is : It loads counter value in memory, increment it by one and hen assign it back to counter variable
+    * Loads Counter in memory with value 0 
+    * Increment the value of counter to  counter + 1
+    * Assign the value back to counter variable
+* During this process both threads might update the value at the same time. 
