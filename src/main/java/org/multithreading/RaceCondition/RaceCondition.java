@@ -4,8 +4,7 @@ public class RaceCondition {
 
     private static int counter = 0;
 
-    public static void main(String[] args) throws InterruptedException {
-
+    public static void raceConditionDemo() throws InterruptedException {
         Thread one = new Thread(RaceCondition::runLoop);
         Thread two = new Thread(RaceCondition::runLoop);
 
@@ -18,7 +17,11 @@ public class RaceCondition {
         System.out.println(counter);
     }
 
-    private static void runLoop(){
+    public static void main(String[] args) throws InterruptedException {
+        raceConditionDemo();
+    }
+
+    private synchronized static void runLoop(){
         for (int i = 0; i < 10000; i++) {
             counter++;
         }

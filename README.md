@@ -279,3 +279,31 @@ threads are accessing the same variable simultaneously.
     * Increment the value of counter to  counter + 1
     * Assign the value back to counter variable
 * During this process both threads might update the value at the same time. 
+
+### Avoiding Race Condition:
+
+#### Using `Synchronized` keyword
+* The synchronized keyword in Java is used to control access to a shared
+resource by multiple threads. It ensures that only one thread can execute
+a block of code or a method that is marked as synchronized at any given time,
+thereby preventing race conditions and ensuring thread safety.
+
+```java
+private synchronized static void runLoop(){
+        for (int i = 0; i < 10000; i++) {
+            counter++;
+        }
+    }
+```
+If we add the `synchronized` keyword to the block, this is always going to ensure that only one thread
+will access it.
+##### How synchronized Works:
+When a thread enters a synchronized block or method,
+it acquires a lock (or monitor) associated with the object or class.
+Other threads attempting to enter a synchronized block or method on the same object
+or class will be blocked until the lock is released by the thread currently holding it.
+
+#### Best Practices:
+* Minimize Synchronized Blocks: Keep synchronized blocks as short as possible to reduce contention and improve performance.
+* Avoid Synchronizing on this or Other Public Objects: This can lead to unexpected deadlocks or other synchronization issues if other code synchronizes on the same object.
+* Prefer Concurrent Collections: Use classes from java.util.concurrent package, such as ConcurrentHashMap, which provide better performance and scalability for concurrent access.
